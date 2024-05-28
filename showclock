@@ -1,0 +1,62 @@
+# Define color escape sequences
+$Red = "`e[31m"
+$Green = "`e[32m"
+$Yellow = "`e[33m"
+$Blue = "`e[34m"
+$Reset = "`e[0m"
+
+# Function to clear the screen
+function Clear-Screen {
+    [System.Console]::Clear()
+}
+
+# Function to add spaces between characters
+function Add-Spaces {
+    param (
+        [string]$text
+    )
+    return -join ($text.ToCharArray() | ForEach-Object { "$_ " })
+}
+
+# Function to create a border around text
+function Add-Border {
+    param (
+        [string]$text
+    )
+    $lines = $text -split "`n"
+    $width = ($lines | Measure-Object -Maximum Length).Maximum
+    $border = "+" + ("-" * ($width + 2)) + "+"
+    $borderedText = $lines | ForEach-Object { "| $_" + (" " * ($width - $_.Length)) + " |" }
+    return $border + "`n" + ($borderedText -join "`n") + "`n" + $border
+}
+
+# Function to display the time in large characters with a border
+function Show-Time {
+    while ($true) {
+        Clear-Screen
+        $time = Get-Date -Format "HH:mm:ss"
+        $spacedTime = Add-Spaces $time
+        $borderedTime = Add-Border $spacedTime
+        Write-Host -NoNewline -ForegroundColor Blue $borderedTime
+        Start-Sleep -Seconds 1
+    }
+}
+
+# Handle script termination
+function Cleanup {
+    Write-Host -NoNewline $Reset
+    Write-Host "Script terminated."
+    exit
+}
+
+# Trap Ctrl+C to call Cleanup
+$host.UI.RawUI.KeyDown += {
+    if ($_.VirtualKeyCode -eq 3) {
+        Cleanup
+    }
+}
+
+# Hide cursor (PowerShell does not have a direct way to hide the cursor, so this is a placeholder)
+
+# Main loop to display the time
+Show-Time
